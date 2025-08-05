@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Learning Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0f0f0f;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode {
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #1a1a1a;
+            border-right: 1px solid #333333;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            position: fixed;
+            left: -300px;
+            z-index: 999;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .light-mode .sidebar {
+            background: #f9fafb;
+            border-right-color: #e5e7eb;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333333;
+        }
+
+        .light-mode .sidebar-header {
+            border-bottom-color: #e5e7eb;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .close-sidebar:hover {
+            background: #333333;
+            color: #ffffff;
+        }
+
+        .light-mode .close-sidebar {
+            color: #6b7280;
+        }
+
+        .light-mode .close-sidebar:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .light-mode .sidebar-title {
+            color: #1f2937;
+        }
+
+        .new-chat-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .chat-history {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .chat-item {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .light-mode .chat-item {
+            background: #ffffff;
+            border-color: #d1d5db;
+        }
+
+        .chat-item:hover {
+            background: #333333;
+            border-color: #667eea;
+        }
+
+        .light-mode .chat-item:hover {
+            background: #f3f4f6;
+            border-color: #667eea;
+        }
+
+        .chat-item.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .chat-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-preview {
+            font-size: 0.75rem;
+            color: #a0a0a0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .light-mode .chat-preview {
+            color: #6b7280;
+        }
+
+        .chat-item.active .chat-preview {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .delete-chat {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .chat-item:hover .delete-chat {
+            opacity: 1;
+        }
+
+        .delete-chat:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .light-mode .sidebar-toggle {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #1f2937;
+        }
+
+        .history-toggle {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .history-toggle:hover {
+            background: #404040;
+            border-color: #667eea;
+        }
+
+        .light-mode .history-toggle {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #1f2937;
+        }
+
+        .light-mode .history-toggle:hover {
+            background: #e5e7eb;
+            border-color: #667eea;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 50px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle:hover {
+            background: #404040;
+            border-color: #667eea;
+        }
+
+        .light-mode .theme-toggle {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #1f2937;
+        }
+
+        .light-mode .theme-toggle:hover {
+            background: #e5e7eb;
+            border-color: #667eea;
+        }
+
+        .theme-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            font-weight: 400;
+        }
+
+        .input-container {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 50px;
+            padding: 1.25rem 4rem 1.25rem 2rem;
+            font-size: 1.1rem;
+            color: #ffffff;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .light-mode .search-input {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            color: #1f2937;
+        }
+
+        .search-input::placeholder {
+            color: #808080;
+        }
+
+        .light-mode .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: #404040;
+            color: #ffffff;
+        }
+
+        .light-mode .action-btn {
+            color: #6b7280;
+        }
+
+        .light-mode .action-btn:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-container {
+            width: 100%;
+            max-width: 700px;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            min-height: 200px;
+        }
+
+        .light-mode .response-container {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+        }
+
+        .response-header {
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .response-content {
+            color: #e0e0e0;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .light-mode .response-content {
+            color: #374151;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #333333;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .topics-section {
+            width: 100%;
+            max-width: 900px;
+            margin-top: 3rem;
+        }
+
+        .topics-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2rem;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .topic-category {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .topic-category:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .category-title {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .topic-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .topic-item {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .topic-item:hover {
+            background: #333333;
+            border-color: #667eea;
+            color: #ffffff;
+        }
+
+        .error {
+            background: #2d1b20;
+            border: 1px solid #8b1538;
+            color: #f87171;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .light-mode .error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .search-input {
+                padding: 1rem 3.5rem 1rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .history-toggle {
+                top: 1rem;
+                left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">Chat History</h3>
+            <button class="close-sidebar" onclick="toggleSidebar()" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        
+        <button class="new-chat-btn" onclick="startNewChat()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Chat
+        </button>
+        
+        <div class="chat-history" id="chat-history">
+            <!-- Chat history items will be populated here -->
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="history-toggle" onclick="toggleSidebar()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </div>
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <span id="theme-text">Light</span>
+        </div>
+
+        <div class="header">
+            <h1 class="title">What's your DSA question today?</h1>
+            <p class="subtitle">Your AI-powered Data Structures & Algorithms learning companion</p>
+        </div>
+
+        <div class="input-container">
+            <textarea 
+                class="search-input" 
+                id="prompt-input" 
+                placeholder="Ask anything about Data Structures and Algorithms..."
+                rows="1"
+            ></textarea>
+            <div class="input-actions">
+                <button class="action-btn" onclick="clearInput()" title="Clear">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c0 1 1 2 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                </button>
+                <button class="action-btn" onclick="generateContent()" title="Generate">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5,3 19,12 5,21 5,16.7 15,12 5,7.3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <button class="generate-btn" id="generate-button" onclick="generateContent()">
+            Generate DSA Explanation
+        </button>
+
+        <div class="response-container" id="response-container" style="display: none;">
+            <div class="response-header">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                DSA Tutor Response
+            </div>
+            <div class="response-content" id="response"></div>
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Chat history management
+        let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+        let currentChatId = null;
+
+        function generateChatId() {
+            return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function startNewChat() {
+            currentChatId = generateChatId();
+            clearInput();
+            updateChatHistoryDisplay();
+            
+            // Close sidebar on mobile after starting new chat
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        function saveToHistory(question, response) {
+            if (!currentChatId) {
+                currentChatId = generateChatId();
+            }
+
+            const existingChatIndex = chatHistory.findIndex(chat => chat.id === currentChatId);
+            const chatData = {
+                id: currentChatId,
+                title: question.length > 50 ? question.substring(0, 50) + '...' : question,
+                preview: response.length > 100 ? response.substring(0, 100) + '...' : response,
+                question: question,
+                response: response,
+                timestamp: new Date().toISOString()
+            };
+
+            if (existingChatIndex >= 0) {
+                chatHistory[existingChatIndex] = chatData;
+            } else {
+                chatHistory.unshift(chatData);
+            }
+
+            // Keep only last 50 chats
+            if (chatHistory.length > 50) {
+                chatHistory = chatHistory.slice(0, 50);
+            }
+
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            updateChatHistoryDisplay();
+        }
+
+        function loadChat(chatId) {
+            const chat = chatHistory.find(c => c.id === chatId);
+            if (chat) {
+                currentChatId = chatId;
+                document.getElementById('prompt-input').value = chat.question;
+                const responseContainer = document.getElementById('response-container');
+                const responseDiv = document.getElementById('response');
+                
+                responseContainer.style.display = 'block';
+                responseDiv.innerText = chat.response;
+                
+                updateChatHistoryDisplay();
+                
+                // Auto-resize textarea
+                const textarea = document.getElementById('prompt-input');
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+                
+                // Close sidebar on mobile after loading chat
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            }
+        }
+
+        function deleteChat(chatId, event) {
+            event.stopPropagation();
+            chatHistory = chatHistory.filter(chat => chat.id !== chatId);
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            
+            if (currentChatId === chatId) {
+                startNewChat();
+            }
+            
+            updateChatHistoryDisplay();
+        }
+
+        function updateChatHistoryDisplay() {
+            const historyContainer = document.getElementById('chat-history');
+            historyContainer.innerHTML = '';
+
+            chatHistory.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
+                chatItem.onclick = () => loadChat(chat.id);
+                
+                chatItem.innerHTML = `
+                    <div class="chat-title">${chat.title}</div>
+                    <div class="chat-preview">${chat.preview}</div>
+                    <button class="delete-chat" onclick="deleteChat('${chat.id}', event)" title="Delete chat">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                `;
+                
+                historyContainer.appendChild(chatItem);
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeText = document.getElementById('theme-text');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            body.classList.toggle('light-mode');
+            
+            if (body.classList.contains('light-mode')) {
+                themeText.textContent = 'Dark';
+                themeIcon.innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                `;
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeText.textContent = 'Light';
+                themeIcon.innerHTML = `
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                `;
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme preference
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const themeText = document.getElementById('theme-text');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            if (savedTheme === 'light') {
+                body.classList.add('light-mode');
+                themeText.textContent = 'Dark';
+                themeIcon.innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                `;
+            } else {
+                themeText.textContent = 'Light';
+            }
+        }
+
+        // API Key hardcoded in the application
+        const API_KEY = "";
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('prompt-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+
+        function setQuestion(question) {
+            document.getElementById('prompt-input').value = question;
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function clearInput() {
+            document.getElementById('prompt-input').value = '';
+            textarea.style.height = 'auto';
+            document.getElementById('response-container').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        async function generateContent() {
+            const prompt = document.getElementById('prompt-input').value;
+            const generateButton = document.getElementById('generate-button');
+            const responseContainer = document.getElementById('response-container');
+            const responseDiv = document.getElementById('response');
+            const errorDiv = document.getElementById('error');
+
+            // Validation
+            if (!prompt.trim()) {
+                showError('Please enter a question about DSA.');
+                return;
+            }
+
+            // Reset UI
+            generateButton.disabled = true;
+            errorDiv.style.display = 'none';
+            responseContainer.style.display = 'block';
+            responseDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing your DSA question and preparing a comprehensive answer...</div>';
+
+            try {
+                // Enhanced prompt for detailed DSA responses
+                const dsaPrompt = `As an expert Data Structures and Algorithms instructor with 15+ years of experience, provide a comprehensive, detailed explanation for this question:
+
+"${prompt}"
+
+Please structure your response to include:
+1. 📋 **Definition & Concept**: Clear, detailed explanation
+2. 🔧 **Implementation**: Code examples in multiple languages where applicable  
+3. ⏱️ **Complexity Analysis**: Detailed time and space complexity with explanations
+4. 📊 **Visual Examples**: Step-by-step examples with data
+5. 🎯 **Use Cases**: Real-world applications and when to use
+6. ⚖️ **Comparisons**: How it compares to alternative approaches
+7. 💡 **Tips & Tricks**: Best practices and common pitfalls
+8. 🧪 **Practice Problems**: Suggest related coding problems
+
+Make this response extremely detailed, educational, and valuable for both beginners and advanced learners. Include mathematical proofs where relevant, and explain the intuition behind concepts.`;
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "contents": [
+                            {
+                                "parts": [
+                                    {
+                                        "text": dsaPrompt
+                                    }
+                                ]
+                            }
+                        ],
+                        "generationConfig": {
+                            "temperature": 0.3,
+                            "topK": 40,
+                            "topP": 0.95,
+                            "maxOutputTokens": 8192,
+                            "candidateCount": 1
+                        },
+                        "safetySettings": [
+                            {
+                                "category": "HARM_CATEGORY_HARASSMENT",
+                                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    const generatedText = data.candidates[0].content.parts[0].text;
+                    responseDiv.innerText = generatedText;
+                    
+                    // Save to chat history
+                    saveToHistory(prompt, generatedText);
+                } else {
+                    throw new Error('No response generated. Please try a different question.');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Error generating response: ${error.message}`);
+                responseDiv.innerText = 'Failed to generate response. Please try again with a different question.';
+            } finally {
+                generateButton.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerText = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Enhanced keyboard shortcuts
+        document.getElementById('prompt-input').addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                generateContent();
+            }
+        });
+
+        // Auto-focus on question input when page loads
+        window.addEventListener('load', function() {
+            document.getElementById('prompt-input').focus();
+            loadTheme();
+            updateChatHistoryDisplay();
+            startNewChat();
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const historyToggle = document.querySelector('.history-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                sidebar.classList.contains('open') && 
+                !sidebar.contains(event.target) && 
+                !historyToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>
