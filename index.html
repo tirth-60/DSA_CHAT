@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DSA Learning Assistant</title>
     <style>
-        /* Your existing CSS styles remain unchanged */
         * {
             margin: 0;
             padding: 0;
@@ -51,7 +50,159 @@
             border-right-color: #e5e7eb;
         }
 
-        /* Additional styles omitted for brevity... */
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333333;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .close-sidebar:hover {
+            background: #333333;
+            color: #ffffff;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .new-chat-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .chat-history {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .chat-item {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .chat-item:hover {
+            background: #333333;
+            border-color: #667eea;
+        }
+
+        .chat-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-preview {
+            font-size: 0.75rem;
+            color: #a0a0a0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-container {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 50px;
+            padding: 1.25rem 4rem 1.25rem 2rem;
+            font-size: 1.1rem;
+            color: #ffffff;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .search-input::placeholder {
+            color: #808080;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
 
         .response-container {
             width: 100%;
@@ -62,11 +213,6 @@
             padding: 2rem;
             margin-bottom: 2rem;
             min-height: 200px;
-        }
-
-        .light-mode .response-container {
-            background: #f9fafb;
-            border-color: #e5e7eb;
         }
 
         .response-header {
@@ -86,11 +232,57 @@
             word-wrap: break-word;
         }
 
-        .light-mode .response-content {
-            color: #374151;
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #667eea;
+            font-size: 1.1rem;
         }
 
-        /* Additional styles omitted for brevity... */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #333333;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #2d1b20;
+            border: 1px solid #8b1538;
+            color: #f87171;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .light-mode .error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .search-input {
+                padding: 1rem 3.5rem 1rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,28 +311,6 @@
     </div>
 
     <div class="main-container">
-        <div class="history-toggle" onclick="toggleSidebar()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <line x1="3" y1="12" x2="21" y2="12"/>
-                <line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-        </div>
-        <div class="theme-toggle" onclick="toggleTheme()">
-            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="5"/>
-                <line x1="12" y1="1" x2="12" y2="3"/>
-                <line x1="12" y1="21" x2="12" y2="23"/>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                <line x1="1" y1="12" x2="3" y2="12"/>
-                <line x1="21" y1="12" x2="23" y2="12"/>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-            </svg>
-            <span id="theme-text">Light</span>
-        </div>
-
         <div class="header">
             <h1 class="title">What's your DSA question today?</h1>
             <p class="subtitle">Your AI-powered Data Structures & Algorithms learning companion</p>
@@ -198,11 +368,6 @@
             currentChatId = generateChatId();
             clearInput();
             updateChatHistoryDisplay();
-            
-            // Close sidebar on mobile after starting new chat
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
         }
 
         function saveToHistory(question, response) {
@@ -247,16 +412,6 @@
                 responseDiv.innerText = chat.response;
                 
                 updateChatHistoryDisplay();
-                
-                // Auto-resize textarea
-                const textarea = document.getElementById('prompt-input');
-                textarea.style.height = 'auto';
-                textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
-                
-                // Close sidebar on mobile after loading chat
-                if (window.innerWidth <= 768) {
-                    toggleSidebar();
-                }
             }
         }
 
@@ -296,70 +451,8 @@
             });
         }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
-        }
-
-        // Theme toggle functionality
-        function toggleTheme() {
-            const body = document.body;
-            const themeText = document.getElementById('theme-text');
-            const themeIcon = document.querySelector('.theme-icon');
-            
-            body.classList.toggle('light-mode');
-            
-            if (body.classList.contains('light-mode')) {
-                themeText.textContent = 'Dark';
-                themeIcon.innerHTML = `
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                `;
-                localStorage.setItem('theme', 'light');
-            } else {
-                themeText.textContent = 'Light';
-                themeIcon.innerHTML = `
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/>
-                    <line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/>
-                    <line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                `;
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
-        // Load saved theme preference
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            const body = document.body;
-            const themeText = document.getElementById('theme-text');
-            const themeIcon = document.querySelector('.theme-icon');
-            
-            if (savedTheme === 'light') {
-                body.classList.add('light-mode');
-                themeText.textContent = 'Dark';
-                themeIcon.innerHTML = `
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                `;
-            } else {
-                themeText.textContent = 'Light';
-            }
-        }
-
-        // Auto-resize textarea
-        const textarea = document.getElementById('prompt-input');
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
-        });
-
         function clearInput() {
             document.getElementById('prompt-input').value = '';
-            textarea.style.height = 'auto';
             document.getElementById('response-container').style.display = 'none';
             document.getElementById('error').style.display = 'none';
         }
@@ -384,7 +477,6 @@
             responseDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing your DSA question and preparing a comprehensive answer...</div>';
 
             try {
-                // Enhanced prompt for detailed DSA responses
                 const dsaPrompt = `As an expert Data Structures and Algorithms instructor with 15+ years of experience, provide a comprehensive, detailed explanation for this question:
 
 "${prompt}"
@@ -397,11 +489,9 @@ Please structure your response to include:
 5. 🎯 **Use Cases**: Real-world applications and when to use
 6. ⚖️ **Comparisons**: How it compares to alternative approaches
 7. 💡 **Tips & Tricks**: Best practices and common pitfalls
-8. 🧪 **Practice Problems**: Suggest related coding problems
+8. 🧪 **Practice Problems**: Suggest related coding problems`;
 
-Make this response extremely detailed, educational, and valuable for both beginners and advanced learners. Include mathematical proofs where relevant, and explain the intuition behind concepts.`;
-
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=YOUR_API_KEY`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -426,4 +516,6 @@ Make this response extremely detailed, educational, and valuable for both beginn
                         "safetySettings": [
                             {
                                 "category": "HARM_CATEGORY_HARASSMENT",
-                                "threshold": "BLOCK_MEDIUM_AND_ABOVE
+                                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+                            }
+                       
